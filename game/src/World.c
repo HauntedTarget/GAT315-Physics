@@ -2,28 +2,32 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
-Body* bodies = NULL;
-int bodyCount = 0;
+elBody* elBodies = NULL;
+int elBodyCount = 0;
 
-Body* CreateBody()
+elBody* CreateBody()
 {
-	Body* newBody = (Body*)malloc(sizeof(Body));
+	elBody* newBody = (elBody*)malloc(sizeof(elBody));
 	assert(newBody != NULL);
+
+	memset(newBody, 0, sizeof(elBody));
+
 	newBody->prev = NULL;
-	newBody->next = bodies;
-	if (bodies != NULL) bodies->prev = newBody;
-	bodies = newBody;
-	bodyCount++;
+	newBody->next = elBodies;
+	if (elBodies != NULL) elBodies->prev = newBody;
+	elBodies = newBody;
+	elBodyCount++;
 	return newBody;
 }
 
-void DestroyBody(Body* body)
+void DestroyBody(elBody* body)
 {
-	assert(bodies != NULL);
+	assert(elBodies != NULL);
 	if (body->prev != NULL) body->prev->next = body->next;
 	if (body->next != NULL) body->next->prev = body->prev;
-	if (bodies = body) bodies = body->next;
-	bodyCount--;
+	if (elBodies = body) elBodies = body->next;
+	elBodyCount--;
 	free(body);
 }

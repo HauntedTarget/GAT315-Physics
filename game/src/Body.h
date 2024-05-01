@@ -1,13 +1,36 @@
 #pragma once
 #include <raylib.h>
+#include <raymath.h>
 
-typedef struct Body
+typedef enum
 {
-	// force -> acceleration -> velocity -> position
-	Vector2 position;
-	Vector2 velocity;
-	Vector2 force;
+	STATIC,
+	KINEMATIC,
+	DYNAMIC
+}elBodyType;
 
-	struct Body* next;
-	struct Body* prev;
-} Body;
+typedef struct elBody
+{
+	elBodyType body;
+
+	// force -> acceleration -> velocity -> position
+	Vector2 position,
+		velocity,
+		force;
+
+	float mass,
+		iMass; // 1 / mass (static = 0)
+
+	struct elBody* next;
+	struct elBody* prev;
+} elBody;
+
+inline void ApplyForce(elBody* body, Vector2 force)
+{
+	body->force = Vector2Add(body->force, force);
+}
+
+inline void ClearForce(elBody* body)
+{
+	body->force = Vector2Zero();
+}

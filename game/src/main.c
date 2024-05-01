@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "World.h"
+#include "Integrator.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -22,11 +23,29 @@ int main(void)
 			fps = (float)GetFPS();
 
 		Vector2 m_Pos = GetMousePosition();
-		if (IsMouseButtonPressed(0))
+		if (IsMouseButtonDown(0))
 		{
-			Body* body = CreateBody();
+			elBody* body = CreateBody();
 			body->position = m_Pos;
-			body->velocity = CreateVector2(GetRandomFloatValue(-5, 5), GetRandomFloatValue(-5, 5));
+			body->mass = GetRandomFloatValue(1, 10);
+		}
+
+		// Apply force
+		elBody* body = elBodies;
+		for (int i = 0; i < elBodyCount; i++)
+		{
+			ApplyForce(body, CreateVector2(0, -100));
+			
+			body = body->next;
+		}
+
+		// Update Bodies
+		body = elBodies;
+		for (int i = 0; i < elBodyCount; i++)
+		{
+			ExplicitEuler(body, deltaTime);
+			ClearForce(body);
+			body = body->next;
 		}
 
 		// Render
@@ -39,13 +58,11 @@ int main(void)
 
 		DrawCircleLines((int)m_Pos.x, (int)m_Pos.y, 10, YELLOW);
 
-		// Update Bodies
-		Body* body = bodies;
-		for (int i = 0; i < bodyCount; i++)
+		// Draw Bodies
+		body = elBodies;
+		for (int i = 0; i < elBodyCount; i++)
 		{
-			body->position = Vector2Add(body->position, body->velocity);
-			DrawCircle(body->position.x, body->position.y, 10, WHITE);
-
+			DrawCircle(body->position.x, body->position.y, body->mass, WHITE);
 			body = body->next;
 		}
 
@@ -53,7 +70,7 @@ int main(void)
 	}
 	CloseWindow();
 
-	free(bodies);
+	free(elBodies);
 
 	return 0;
 }
