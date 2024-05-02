@@ -6,6 +6,7 @@
 
 elBody* elBodies = NULL;
 int elBodyCount = 0;
+Vector2 elGravity;
 
 elBody* CreateBody()
 {

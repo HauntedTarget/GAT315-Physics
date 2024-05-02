@@ -15,6 +15,9 @@ int main(void)
 	InitWindow(800, 450, "Physics Engine");
 	SetTargetFPS(60);
 
+	// Init World
+	elGravity = CreateVector2(0, 30);
+
 	// Game Loop
 	while (!WindowShouldClose())
 	{
@@ -28,23 +31,27 @@ int main(void)
 			elBody* body = CreateBody();
 			body->position = m_Pos;
 			body->mass = GetRandomFloatValue(1, 10);
+			body->iMass = 1 / body->mass;
+			body->type = DYNAMIC;
+			body->damping = 2.5f;
+			body->gravityScale = 20;
+			ApplyForce(body, (Vector2) { GetRandomFloatValue(-200, 200), GetRandomFloatValue(-200, 200) }, Velocity);
 		}
 
 		// Apply force
 		elBody* body = elBodies;
-		for (int i = 0; i < elBodyCount; i++)
+		/*for (int i = 0; i < elBodyCount; i++)
 		{
 			ApplyForce(body, CreateVector2(0, -100));
 			
 			body = body->next;
-		}
+		}*/
 
 		// Update Bodies
 		body = elBodies;
 		for (int i = 0; i < elBodyCount; i++)
 		{
-			ExplicitEuler(body, deltaTime);
-			ClearForce(body);
+			Step(body, deltaTime);
 			body = body->next;
 		}
 
