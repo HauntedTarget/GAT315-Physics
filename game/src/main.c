@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "World.h"
+#include "Force.h"
 #include "Integrator.h"
 
 #include <stdlib.h>
@@ -16,7 +17,7 @@ int main(void)
 	SetTargetFPS(60);
 
 	// Init World
-	elGravity = CreateVector2(0, 30);
+	elGravity = CreateVector2(0, 0);
 
 	// Game Loop
 	while (!WindowShouldClose())
@@ -39,20 +40,12 @@ int main(void)
 		}
 
 		// Apply force
-		elBody* body = elBodies;
-		/*for (int i = 0; i < elBodyCount; i++)
-		{
-			ApplyForce(body, CreateVector2(0, -100));
-			
-			body = body->next;
-		}*/
+		ApplyGravitation(elBodies, 30);
 
 		// Update Bodies
-		body = elBodies;
-		for (int i = 0; i < elBodyCount; i++)
+		for (elBody* body = elBodies; body; body = body->next)
 		{
 			Step(body, deltaTime);
-			body = body->next;
 		}
 
 		// Render
@@ -66,11 +59,9 @@ int main(void)
 		DrawCircleLines((int)m_Pos.x, (int)m_Pos.y, 10, YELLOW);
 
 		// Draw Bodies
-		body = elBodies;
-		for (int i = 0; i < elBodyCount; i++)
+		for (elBody* body = elBodies; body; body = body->next)
 		{
 			DrawCircle(body->position.x, body->position.y, body->mass, WHITE);
-			body = body->next;
 		}
 
 		EndDrawing();
