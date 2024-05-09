@@ -5,6 +5,8 @@
 #include "World.h"
 #include "Force.h"
 #include "Integrator.h"
+#include "render.h"
+#include "editor.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -13,11 +15,12 @@
 
 int main(void)
 {
-	InitWindow(800, 450, "Physics Engine");
+	InitWindow(elScreenSize.x, elScreenSize.y, "Physics Engine");
+	InitEditor();
 	SetTargetFPS(60);
 
 	// Init World
-	elGravity = CreateVector2(0, 0);
+	elGravity = CreateVector2(0, -1);
 
 	// Game Loop
 	while (!WindowShouldClose())
@@ -27,20 +30,26 @@ int main(void)
 			fps = (float)GetFPS();
 
 		Vector2 m_Pos = GetMousePosition();
+		elScreenZoom -= GetMouseWheelMove() * 0.2f;
+		elScreenZoom = Clamp(elScreenZoom, 0.1f, INT_MAX);
+
+		UpdateEditor(m_Pos);
+
 		if (IsMouseButtonDown(0))
 		{
 			elBody* body = CreateBody();
-			body->position = m_Pos;
-			body->mass = GetRandomFloatValue(1, 10);
+			body->position = ConvertScreenToWorld(m_Pos);
+			body->mass = GetRandomFloatValue(0.1f, 1);
 			body->iMass = 1 / body->mass;
 			body->type = DYNAMIC;
 			body->damping = 2.5f;
 			body->gravityScale = 20;
-			ApplyForce(body, (Vector2) { GetRandomFloatValue(-200, 200), GetRandomFloatValue(-200, 200) }, Velocity);
+			body->color = WHITE;
+			//ApplyForce(body, (Vector2) { GetRandomFloatValue(-200, 200), GetRandomFloatValue(-200, 200) }, Velocity);
 		}
 
 		// Apply force
-		ApplyGravitation(elBodies, 30);
+		ApplyGravitation(elBodies, 20);
 
 		// Update Bodies
 		for (elBody* body = elBodies; body; body = body->next)
@@ -50,9 +59,11 @@ int main(void)
 
 		// Render
 		BeginDrawing();
-
 		ClearBackground(BLACK);
 
+		DrawEditor();
+
+		// Stats
 		DrawText(TextFormat("FPS: %.2f (%.2fms)", fps, 1000/fps), 10, 10, 20, LIME);
 		DrawText(TextFormat("FRAMES: %.4f", deltaTime), 10, 30, 20, LIME);
 
@@ -61,7 +72,8 @@ int main(void)
 		// Draw Bodies
 		for (elBody* body = elBodies; body; body = body->next)
 		{
-			DrawCircle(body->position.x, body->position.y, body->mass, WHITE);
+			Vector2 screen = ConvertWorldToScreen(body->position);
+			DrawCircle(screen.x, screen.y, ConvertWorldToPixel(body->mass), body->color);
 		}
 
 		EndDrawing();

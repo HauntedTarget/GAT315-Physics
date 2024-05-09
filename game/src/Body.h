@@ -26,6 +26,8 @@ typedef struct elBody
 		force,
 		accleration;
 
+	Color color;
+
 	float mass,
 		iMass, // 1 / mass (static = 0)
 		damping,
