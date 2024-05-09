@@ -39,17 +39,17 @@ int main(void)
 		{
 			elBody* body = CreateBody();
 			body->position = ConvertScreenToWorld(m_Pos);
-			body->mass = GetRandomFloatValue(0.1f, 1);
+			body->mass = GetRandomFloatValue(elEditorData.massMinValue, elEditorData.massMaxValue);
 			body->iMass = 1 / body->mass;
 			body->type = DYNAMIC;
-			body->damping = 2.5f;
-			body->gravityScale = 20;
+			body->damping = 0;
+			body->gravityScale = 0;
 			body->color = WHITE;
 			//ApplyForce(body, (Vector2) { GetRandomFloatValue(-200, 200), GetRandomFloatValue(-200, 200) }, Velocity);
 		}
 
 		// Apply force
-		ApplyGravitation(elBodies, 20);
+		ApplyGravitation(elBodies, elEditorData.gravitationValue);
 
 		// Update Bodies
 		for (elBody* body = elBodies; body; body = body->next)
@@ -61,20 +61,20 @@ int main(void)
 		BeginDrawing();
 		ClearBackground(BLACK);
 
-		DrawEditor();
-
-		// Stats
-		DrawText(TextFormat("FPS: %.2f (%.2fms)", fps, 1000/fps), 10, 10, 20, LIME);
-		DrawText(TextFormat("FRAMES: %.4f", deltaTime), 10, 30, 20, LIME);
-
-		DrawCircleLines((int)m_Pos.x, (int)m_Pos.y, 10, YELLOW);
-
 		// Draw Bodies
 		for (elBody* body = elBodies; body; body = body->next)
 		{
 			Vector2 screen = ConvertWorldToScreen(body->position);
 			DrawCircle(screen.x, screen.y, ConvertWorldToPixel(body->mass), body->color);
 		}
+
+		DrawEditor();
+
+		// Stats
+		DrawText(TextFormat("FPS: %.2f (%.2fms)", fps, 1000 / fps), 10, 10, 20, LIME);
+		DrawText(TextFormat("FRAMES: %.4f", deltaTime), 10, 30, 20, LIME);
+
+		DrawCircleLines((int)m_Pos.x, (int)m_Pos.y, 10, YELLOW);
 
 		EndDrawing();
 	}

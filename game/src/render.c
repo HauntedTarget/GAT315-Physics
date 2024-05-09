@@ -1,7 +1,7 @@
 #include "render.h"
 #include "raymath.h"
 
-Vector2 elScreenSize = { 800 , 450 };
+Vector2 elScreenSize = { 1280 , 720 };
 float elScreenZoom = 1.0f;
 float elViewSize = 25.0f;
 
