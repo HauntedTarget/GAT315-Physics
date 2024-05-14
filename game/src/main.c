@@ -7,6 +7,7 @@
 #include "Integrator.h"
 #include "render.h"
 #include "editor.h"
+#include "Spring.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -15,7 +16,10 @@
 
 int main(void)
 {
-	InitWindow(elScreenSize.x, elScreenSize.y, "Physics Engine");
+	elBody* selectedBody = NULL;
+	elBody* connectBody = NULL;
+
+	InitWindow((int)elScreenSize.x, (int)elScreenSize.y, "Physics Engine");
 	InitEditor();
 	SetTargetFPS(60);
 
@@ -31,25 +35,55 @@ int main(void)
 
 		Vector2 m_Pos = GetMousePosition();
 		elScreenZoom -= GetMouseWheelMove() * 0.2f;
-		elScreenZoom = Clamp(elScreenZoom, 0.1f, INT_MAX);
+		elScreenZoom = Clamp(elScreenZoom, 0.1f, (float)INT_MAX);
 
 		UpdateEditor(m_Pos);
 
-		if (IsMouseButtonDown(0))
+		selectedBody = GetBodyIntersect(elBodies, m_Pos);
+		if (selectedBody)
 		{
-			elBody* body = CreateBody();
-			body->position = ConvertScreenToWorld(m_Pos);
-			body->mass = GetRandomFloatValue(elEditorData.massMinValue, elEditorData.massMaxValue);
-			body->iMass = 1 / body->mass;
-			body->type = DYNAMIC;
+			Vector2 screen = ConvertWorldToScreen(selectedBody->position);
+			DrawCircleLines((int)screen.x, (int)screen.y, ConvertWorldToPixel(selectedBody->mass) + 5, YELLOW);
+		}
+
+		// Create Body
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		{
+			elBody* body = CreateBody(ConvertScreenToWorld(m_Pos), 
+				GetRandomFloatValue(elEditorData.massMinValue, elEditorData.massMaxValue), 
+				DYNAMIC);
 			body->damping = 0;
-			body->gravityScale = 0;
+			body->gravityScale = elEditorData.gravitationValue;
 			body->color = WHITE;
-			//ApplyForce(body, (Vector2) { GetRandomFloatValue(-200, 200), GetRandomFloatValue(-200, 200) }, Velocity);
+
+			AddBody(body);
+		}
+
+		// Connect Spring
+		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && selectedBody && !connectBody)
+		{
+			connectBody = selectedBody;
+		}
+
+		if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT) && connectBody)
+		{
+			DrawLineBodyToPosition(connectBody, m_Pos);
+		}
+
+		if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT) && connectBody)
+		{
+			if (selectedBody && selectedBody != connectBody)
+			{
+				elSpring_t* spring = CreateSpring(connectBody, selectedBody, Vector2Distance(connectBody->position, selectedBody->position), 20);
+				AddSpring(spring);
+			}
+			
+			connectBody = NULL;
 		}
 
 		// Apply force
-		ApplyGravitation(elBodies, elEditorData.gravitationValue);
+		ApplyGravitation(elBodies, elEditorData.objectGravity);
+		ApplySpringForce(elSprings);
 
 		// Update Bodies
 		for (elBody* body = elBodies; body; body = body->next)
@@ -61,20 +95,28 @@ int main(void)
 		BeginDrawing();
 		ClearBackground(BLACK);
 
+		// Draw Springs
+		for (elSpring_t* spring = elSprings; spring; spring = spring->next)
+		{
+			Vector2 screen1 = ConvertWorldToScreen(spring->body1->position);
+			Vector2 screen2 = ConvertWorldToScreen(spring->body2->position);
+			DrawLine(screen1.x, screen1.y, screen2.x, screen2.y, ORANGE);
+		}
+
 		// Draw Bodies
 		for (elBody* body = elBodies; body; body = body->next)
 		{
 			Vector2 screen = ConvertWorldToScreen(body->position);
-			DrawCircle(screen.x, screen.y, ConvertWorldToPixel(body->mass), body->color);
+			DrawCircle((int)screen.x, (int)screen.y, ConvertWorldToPixel(body->mass), body->color);
 		}
 
-		DrawEditor();
+		DrawEditor(m_Pos);
 
 		// Stats
 		DrawText(TextFormat("FPS: %.2f (%.2fms)", fps, 1000 / fps), 10, 10, 20, LIME);
 		DrawText(TextFormat("FRAMES: %.4f", deltaTime), 10, 30, 20, LIME);
 
-		DrawCircleLines((int)m_Pos.x, (int)m_Pos.y, 10, YELLOW);
+		//DrawCircleLines((int)m_Pos.x, (int)m_Pos.y, 10, YELLOW);
 
 		EndDrawing();
 	}

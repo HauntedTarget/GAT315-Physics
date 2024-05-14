@@ -8,19 +8,33 @@ elBody* elBodies = NULL;
 int elBodyCount = 0;
 Vector2 elGravity;
 
-elBody* CreateBody()
+elBody* CreateBody(Vector2 position, float mass, elBodyType bType)
 {
-	elBody* newBody = (elBody*)malloc(sizeof(elBody));
-	assert(newBody != NULL);
+	elBody* body = (elBody*)malloc(sizeof(elBody));
+	assert(body != NULL);
 
-	memset(newBody, 0, sizeof(elBody));
+	memset(body, 0, sizeof(elBody));
 
-	newBody->prev = NULL;
-	newBody->next = elBodies;
-	if (elBodies != NULL) elBodies->prev = newBody;
-	elBodies = newBody;
+	body->position = position;
+	body->mass = mass;
+	body->iMass = (bType == DYNAMIC) ? 1 / mass : 0;
+	body->type = bType;
+
+	return body;
+}
+
+void AddBody(elBody* body)
+{
+	assert(body != NULL);
+
+	body->prev = NULL;
+	body->next = elBodies;
+
+	if (elBodies != NULL) elBodies->prev = body;
+
+	elBodies = body;
+
 	elBodyCount++;
-	return newBody;
 }
 
 void DestroyBody(elBody* body)
