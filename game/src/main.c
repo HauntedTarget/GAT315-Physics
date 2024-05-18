@@ -97,6 +97,7 @@ int main(void)
 		elContact_t* contacts = NULL;
 		CreateContacts(elBodies, &contacts);
 		SeparateContacts(contacts);
+		ResolveContacts(contacts);
 
 		
 		// Render

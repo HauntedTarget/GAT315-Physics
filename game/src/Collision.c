@@ -79,5 +79,16 @@ void SeparateContacts(elContact_t* contacts)
 
 void ResolveContacts(elContact_t* contacts)
 {
+	for (elContact_t* contact = contacts; contact; contact = contact->next)
+	{
+		Vector2 relativeVelocity = Vector2Subtract(contact->body1->velocity, contact->body2->velocity);
+		float normalVelocity = Vector2DotProduct(relativeVelocity, contact->normal);
+		if (normalVelocity > 0) continue;
 
+		float impulseMagnitude = -(1 + contact->restitution) * normalVelocity / (contact->body1->iMass + contact->body2->iMass);
+		Vector2 impulse = CreateVector2(contact->normal.x * impulseMagnitude, contact->normal.y * impulseMagnitude);
+
+		ApplyForce(contact->body1, impulse, Impulse);
+		ApplyForce(contact->body2, Vector2Negate(impulse), Impulse);
+	}
 }
