@@ -8,6 +8,8 @@
 #include "render.h"
 #include "editor.h"
 #include "Spring.h"
+#include "contact.h"
+#include "Collision.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -43,11 +45,11 @@ int main(void)
 		if (selectedBody)
 		{
 			Vector2 screen = ConvertWorldToScreen(selectedBody->position);
-			DrawCircleLines((int)screen.x, (int)screen.y, ConvertWorldToPixel(selectedBody->mass) + 5, YELLOW);
+			DrawCircleLines((int)screen.x, (int)screen.y, ConvertWorldToPixel(selectedBody->mass * 0.5f) + 5, YELLOW);
 		}
 
 		// Create Body
-		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || (IsKeyDown(KEY_LEFT_SHIFT) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)))
 		{
 			elBody* body = CreateBody(ConvertScreenToWorld(m_Pos), 
 				GetRandomFloatValue(elEditorData.massMinValue, elEditorData.massMaxValue), 
@@ -91,6 +93,12 @@ int main(void)
 			Step(body, deltaTime);
 		}
 
+		// Collision
+		elContact_t* contacts = NULL;
+		CreateContacts(elBodies, &contacts);
+		SeparateContacts(contacts);
+
+		
 		// Render
 		BeginDrawing();
 		ClearBackground(BLACK);
@@ -107,7 +115,14 @@ int main(void)
 		for (elBody* body = elBodies; body; body = body->next)
 		{
 			Vector2 screen = ConvertWorldToScreen(body->position);
-			DrawCircle((int)screen.x, (int)screen.y, ConvertWorldToPixel(body->mass), body->color);
+			DrawCircle((int)screen.x, (int)screen.y, ConvertWorldToPixel(body->mass * 0.5f), body->color);
+		}
+
+		// Draw Contacts
+		for (elContact_t* contact = contacts; contact; contact = contact->next)
+		{
+			Vector2 screen = ConvertWorldToScreen(contact->body1->position);
+			DrawCircleLines((int)screen.x, (int)screen.y, ConvertWorldToPixel(contact->body1->mass * 0.5f), RED);
 		}
 
 		DrawEditor(m_Pos);

@@ -31,7 +31,9 @@ typedef struct elBody
 	float mass,
 		iMass, // 1 / mass (static = 0)
 		damping,
-		gravityScale;
+		gravityScale,
+
+		restitution; 
 
 	struct elBody* next;
 	struct elBody* prev;
