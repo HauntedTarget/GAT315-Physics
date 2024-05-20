@@ -1,11 +1,15 @@
 #pragma once
 #include "raylib.h"
+#include "Body.h"
 
 typedef struct elEditorData {
-	float massMinValue,
-		massMaxValue,
+	float massValue,
 		gravitationValue,
-		objectGravity;
+		objectGravity,
+		resitution,
+		dampening,
+		stiffness;
+	elBodyType selectedType;
 }elEditorData_t;
 
 extern elEditorData_t elEditorData;

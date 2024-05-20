@@ -1,5 +1,4 @@
 #include "editor.h"
-#include "Body.h"
 #include "render.h"
 #define RAYGUI_IMPLEMENTATION
 #include "../../raygui/src/raygui.h"
@@ -12,7 +11,8 @@ elEditorData_t elEditorData;
 Vector2 anchor01 = { 950, 56 };
 Texture2D cursorTexture;
 
-bool EditorBoxActive = true;
+bool EditorBoxActive = true,
+typeDropDownActive = false;
 
 void InitEditor()
 {
@@ -25,8 +25,12 @@ void InitEditor()
 
     elEditorData.objectGravity = 2.0f;
     elEditorData.gravitationValue = 0.0f;
-    elEditorData.massMinValue = 1.0f;
-    elEditorData.massMaxValue = 4.0f;
+    elEditorData.massValue = 4.0f;
+    elEditorData.resitution = 1.0f;
+    elEditorData.dampening = 0.0f;
+    elEditorData.stiffness = 20.0f;
+
+    elEditorData.selectedType = DYNAMIC;
 }
 
 void UpdateEditor(Vector2 position)
@@ -38,13 +42,19 @@ void DrawEditor(Vector2 position)
 {
     if (EditorBoxActive)
     {
-        EditorBoxActive = !GuiWindowBox((Rectangle) { anchor01.x + 0, anchor01.y + 0, 304, 616 }, "Editor");
-
-        GuiSliderBar((Rectangle) { anchor01.x + 80, anchor01.y + 80, 120, 16 }, "Mass Min", NULL, & elEditorData.massMinValue, 0, 100);
-        GuiSliderBar((Rectangle) { anchor01.x + 80, anchor01.y + 120, 120, 16 }, "Mass Max", NULL, & elEditorData.massMaxValue, 0, 100);
-        GuiSliderBar((Rectangle) { anchor01.x + 80, anchor01.y + 216, 120, 16 }, "Object Gravity", NULL, & elEditorData.objectGravity, 0, 100);
-        GuiSliderBar((Rectangle) { anchor01.x + 80, anchor01.y + 168, 120, 16 }, "World Gravitaty", NULL, & elEditorData.gravitationValue, 0, 100);
+        EditorBoxActive = !GuiWindowBox((Rectangle) { 896, 64, 200, 648 }, "Editor");
     }
+    GuiGroupBox((Rectangle) { 912, 72, 168, 248 }, "Body");
+    GuiSliderBar((Rectangle) { 936, 200, 120, 16 }, "Mass", TextFormat("%0.2f", elEditorData.massValue), & elEditorData.massValue, 0, 100);
+    GuiSliderBar((Rectangle) { 936, 136, 120, 16 }, "Damping", TextFormat("%0.2f", elEditorData.dampening), & elEditorData.dampening, 0, 100);
+    GuiSliderBar((Rectangle) { 936, 168, 120, 16 }, "Gravity Scale", TextFormat("%0.2f", elEditorData.objectGravity), & elEditorData.objectGravity, 0, 100);
+    GuiSliderBar((Rectangle) { 936, 232, 120, 16 }, "Stiffness", TextFormat("%0.2f", elEditorData.stiffness), & elEditorData.stiffness, 0, 100);
+    GuiSliderBar((Rectangle) { 936, 264, 120, 16 }, "Restitution", TextFormat("%0.2f", elEditorData.resitution), & elEditorData.resitution, 0, 100);
+
+    GuiSliderBar((Rectangle) { 936, 448, 120, 16 }, "Gravitation", TextFormat("%0.2f", elEditorData.gravitationValue), & elEditorData.gravitationValue, 0, 100);
+    //GuiSliderBar((Rectangle) { 936, 488, 120, 16 }, "Time Step", NULL, & SliderBar021Value, 0, 100);
+
+    if (GuiDropdownBox((Rectangle) { 936, 96, 120, 24 }, "DYNAMIC;KINEMATIC;STATIC", &elEditorData.selectedType, typeDropDownActive)) typeDropDownActive = !typeDropDownActive;
 
     DrawTexture(cursorTexture, (int)position.x - cursorTexture.width / 2, (int)position.y - cursorTexture.height / 2, YELLOW);
 }

@@ -11,9 +11,9 @@ typedef enum
 
 typedef enum
 {
-	STATIC,
+	DYNAMIC,
 	KINEMATIC,
-	DYNAMIC
+	STATIC
 }elBodyType;
 
 typedef struct elBody
@@ -50,7 +50,7 @@ inline void ApplyForce(elBody* body, Vector2 force, elForceMode forceMode)
 			
 			break;
 		case Impulse:
-			body->velocity = Vector2Scale(force, body->iMass);
+			body->velocity = Vector2Add(body->velocity, Vector2Scale(force, body->iMass));
 
 			break;
 		case Velocity:

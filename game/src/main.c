@@ -32,7 +32,7 @@ int main(void)
 	while (!WindowShouldClose())
 	{
 		// Update Logic
-		float deltaTime = GetFrameTime(), 
+		float deltaTime = GetFrameTime(),
 			fps = (float)GetFPS();
 
 		Vector2 m_Pos = GetMousePosition();
@@ -52,9 +52,10 @@ int main(void)
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || (IsKeyDown(KEY_LEFT_SHIFT) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)))
 		{
 			elBody* body = CreateBody(ConvertScreenToWorld(m_Pos), 
-				GetRandomFloatValue(elEditorData.massMinValue, elEditorData.massMaxValue), 
-				DYNAMIC);
-			body->damping = 0;
+				elEditorData.massValue,
+				elEditorData.selectedType,
+				elEditorData.resitution);
+			body->damping = elEditorData.dampening;
 			body->gravityScale = elEditorData.gravitationValue;
 			body->color = WHITE;
 
@@ -76,7 +77,7 @@ int main(void)
 		{
 			if (selectedBody && selectedBody != connectBody)
 			{
-				elSpring_t* spring = CreateSpring(connectBody, selectedBody, Vector2Distance(connectBody->position, selectedBody->position), 20);
+				elSpring_t* spring = CreateSpring(connectBody, selectedBody, Vector2Distance(connectBody->position, selectedBody->position), elEditorData.stiffness);
 				AddSpring(spring);
 			}
 			

@@ -285,6 +285,7 @@
     <ClInclude Include="src\Collision.h" />
     <ClInclude Include="src\contact.h" />
     <ClInclude Include="src\editor.h" />
+    <ClInclude Include="src\elLayout.h" />
     <ClInclude Include="src\Force.h" />
     <ClInclude Include="src\Integrator.h" />
     <ClInclude Include="src\mathF.h" />

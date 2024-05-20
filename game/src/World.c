@@ -8,7 +8,7 @@ elBody* elBodies = NULL;
 int elBodyCount = 0;
 Vector2 elGravity;
 
-elBody* CreateBody(Vector2 position, float mass, elBodyType bType)
+elBody* CreateBody(Vector2 position, float mass, elBodyType bType, float restitution)
 {
 	elBody* body = (elBody*)malloc(sizeof(elBody));
 	assert(body != NULL);
@@ -19,6 +19,7 @@ elBody* CreateBody(Vector2 position, float mass, elBodyType bType)
 	body->mass = mass;
 	body->iMass = (bType == DYNAMIC) ? 1 / mass : 0;
 	body->type = bType;
+	body->restitution = restitution;
 
 	return body;
 }
