@@ -20,10 +20,15 @@ int main(void)
 {
 	elBody* selectedBody = NULL;
 	elBody* connectBody = NULL;
+	elBody* editedBody = NULL;
+
+	elContact_t* contacts = NULL;
 
 	InitWindow((int)elScreenSize.x, (int)elScreenSize.y, "Physics Engine");
 	InitEditor();
 	SetTargetFPS(60);
+
+	float timeThing = 0;
 
 	// Init World
 	elGravity = CreateVector2(0, -1);
@@ -33,7 +38,9 @@ int main(void)
 	{
 		// Update Logic
 		float deltaTime = GetFrameTime(),
-			fps = (float)GetFPS();
+			fps = (float)GetFPS(),
+			fixedTime = 1 / elEditorData.timeStep;
+		timeThing += deltaTime;
 
 		Vector2 m_Pos = GetMousePosition();
 		elScreenZoom -= GetMouseWheelMove() * 0.2f;
@@ -51,15 +58,46 @@ int main(void)
 		// Create Body
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || (IsKeyDown(KEY_LEFT_SHIFT) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)))
 		{
-			elBody* body = CreateBody(ConvertScreenToWorld(m_Pos), 
-				elEditorData.massValue,
-				elEditorData.selectedType,
-				elEditorData.resitution);
-			body->damping = elEditorData.dampening;
-			body->gravityScale = elEditorData.gravitationValue;
-			body->color = WHITE;
+			if (!IsKeyDown(KEY_LEFT_CONTROL))
+			{
+				elBody* body = CreateBody(ConvertScreenToWorld(m_Pos),
+					elEditorData.massValue,
+					elEditorData.selectedType,
+					elEditorData.resitution);
+				body->damping = elEditorData.dampening;
+				body->gravityScale = elEditorData.gravitationValue;
+				body->color = WHITE;
 
-			AddBody(body);
+				AddBody(body);
+			}
+		}
+
+		// Edit Body
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && IsKeyDown(KEY_LEFT_CONTROL))
+		{
+			editedBody = GetBodyIntersect(elBodies, m_Pos);
+		}
+
+		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && IsKeyDown(KEY_LEFT_CONTROL))
+		{
+			editedBody = NULL;
+		}
+
+		if (editedBody)
+		{
+			Vector2 screen = ConvertWorldToScreen(editedBody->position);
+			DrawCircleLines((int)screen.x, (int)screen.y, ConvertWorldToPixel(editedBody->mass * 0.5f) + 3, BLUE);
+
+			editedBody->mass = elEditorData.massValue;
+			editedBody->damping = elEditorData.dampening;
+			editedBody->gravityScale = elEditorData.gravitationValue;
+			editedBody->restitution = elEditorData.resitution;
+		}
+
+		// Delete Selected Body
+		if (IsKeyPressed(KEY_DELETE) && selectedBody)
+		{
+			DestroyBody(selectedBody);
 		}
 
 		// Connect Spring
@@ -84,22 +122,25 @@ int main(void)
 			connectBody = NULL;
 		}
 
-		// Apply force
-		ApplyGravitation(elBodies, elEditorData.objectGravity);
-		ApplySpringForce(elSprings);
-
-		// Update Bodies
-		for (elBody* body = elBodies; body; body = body->next)
+		while (timeThing >= fixedTime)
 		{
-			Step(body, deltaTime);
+			timeThing -= fixedTime;
+
+			// Apply force
+			ApplyGravitation(elBodies, elEditorData.objectGravity);
+			ApplySpringForce(elSprings);
+
+			// Update Bodies
+			for (elBody* body = elBodies; body; body = body->next)
+			{
+				Step(body, deltaTime);
+			}
+
+			// Collision
+			CreateContacts(elBodies, &contacts);
+			SeparateContacts(contacts);
+			ResolveContacts(contacts);
 		}
-
-		// Collision
-		elContact_t* contacts = NULL;
-		CreateContacts(elBodies, &contacts);
-		SeparateContacts(contacts);
-		ResolveContacts(contacts);
-
 		
 		// Render
 		BeginDrawing();

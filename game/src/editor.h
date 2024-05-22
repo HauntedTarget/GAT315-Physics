@@ -8,7 +8,8 @@ typedef struct elEditorData {
 		objectGravity,
 		resitution,
 		dampening,
-		stiffness;
+		stiffness,
+		timeStep;
 	elBodyType selectedType;
 }elEditorData_t;
 

@@ -29,6 +29,7 @@ void InitEditor()
     elEditorData.resitution = 1.0f;
     elEditorData.dampening = 0.0f;
     elEditorData.stiffness = 20.0f;
+    elEditorData.timeStep = 23.0f;
 
     elEditorData.selectedType = DYNAMIC;
 }
@@ -52,7 +53,7 @@ void DrawEditor(Vector2 position)
     GuiSliderBar((Rectangle) { 936, 264, 120, 16 }, "Restitution", TextFormat("%0.2f", elEditorData.resitution), & elEditorData.resitution, 0, 100);
 
     GuiSliderBar((Rectangle) { 936, 448, 120, 16 }, "Gravitation", TextFormat("%0.2f", elEditorData.gravitationValue), & elEditorData.gravitationValue, 0, 100);
-    //GuiSliderBar((Rectangle) { 936, 488, 120, 16 }, "Time Step", NULL, & SliderBar021Value, 0, 100);
+    GuiSliderBar((Rectangle) { 936, 488, 120, 16 }, "Time Step", TextFormat("%0.2f", elEditorData.timeStep), & elEditorData.timeStep, 0, 100);
 
     if (GuiDropdownBox((Rectangle) { 936, 96, 120, 24 }, "DYNAMIC;KINEMATIC;STATIC", &elEditorData.selectedType, typeDropDownActive)) typeDropDownActive = !typeDropDownActive;
 

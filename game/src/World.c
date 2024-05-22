@@ -47,3 +47,16 @@ void DestroyBody(elBody* body)
 	elBodyCount--;
 	free(body);
 }
+
+void DestroyAllBodies()
+{
+	if (!elBodies) return;
+
+	elBody* body = elBodies;
+	while (body)
+	{
+		elBody* next = body->next;
+		free(body);
+		body = next;
+	}
+}
